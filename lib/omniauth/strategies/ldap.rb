@@ -33,9 +33,13 @@ module OmniAuth
           @uid = username
           @ldap_user_info = ldap.search(:base => options[:base],
             :filter => Net::LDAP::Filter.eq(options[:uid], username),
-            :limit => 1).first || {}
+            :limit => 1).try(:first)
 
-          super
+          if @ldap_user_info.nil?
+            fail!(:invalid_credentials)
+          else
+            super
+          end
         else
           fail!(:invalid_credentials)
         end
